@@ -1,0 +1,9 @@
+from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
+
+from users import views
+
+urlpatterns = [
+    path("", views.information, name="information"),
+    path("create/", csrf_exempt(views.create), name="create"),
+]
