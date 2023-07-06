@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse ,JsonResponse
 
 from inventory.models import Inventory
+from inventory.utils.auth import validate_token
 
 # Create your views here.
 def index(request):
@@ -14,6 +15,14 @@ def contact(request):
 
 def create(request):
     if request.method == "POST":
+        #print(request.headers)
+        token_is_valied=validate_token(dict(request.headers).get("X-Token"))  #Mande o no mande el token is invalid
+
+        if not token_is_valied:
+            return JsonResponse(
+                {"message": "Invalid Token",}, status=401
+            )
+
         data = json.loads(request.body)
         Inventory.objects.create(
             name = data["name"],
@@ -41,6 +50,12 @@ def create(request):
     
 def list(request):
     if request.method == "GET":
+        """ token_is_valied=validate_token(request.headers["X-Token"])
+
+        if not token_is_valied:
+            return JsonResponse(
+                {"message": "Invalid Token",}, status=401
+            ) """
         response = [
             {
             "id": inventory.id,
@@ -60,6 +75,12 @@ def list(request):
     
 def get(request, id: int):
     if request.method =="GET":
+       # return JsonResponse({"message": "Invalid Token",}, status=401) if not validate_token(dict(request.headers).get("X-Token")) else None
+
+        if not validate_token(dict(request.headers).get("X-Token")):
+            return JsonResponse(
+                {"message": "Invalid Token",}, status=401
+            )
         try:
             response = Inventory.objects.get(pk=id)
         
@@ -92,6 +113,12 @@ def update(request, id: int):
 
 
     if request.method == "PUT":
+        """ token_is_valied=validate_token(request.headers["X-Token"])
+
+        if not token_is_valied:
+            return JsonResponse(
+                {"message": "Invalid Token",}, status=401
+            ) """
         
         try:
             object_to_update = Inventory.objects.get(pk=id)
@@ -139,6 +166,12 @@ def update(request, id: int):
 def delete(request, id: int):
 
     if request.method == "DELETE":
+        token_is_valied=validate_token(request.headers["X-Token"])
+
+        if not token_is_valied:
+            return JsonResponse(
+                {"message": "Invalid Token",}, status=401
+            )
         
         try:
             object_to_update = Inventory.objects.get(pk=id)
